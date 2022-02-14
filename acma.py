@@ -8,5 +8,8 @@ run("unzip -o spectra_rrl.zip", shell=True)
 datadir = Path(".")
 for csv in datadir.glob("*.csv"):
     run(["ls", "-lh", csv])
-    run(["ogr2ogr", "-update", "-overwrite", "-oo", "X_POSSIBLE_NAMES=LON*", "-oo", "Y_POSSIBLE_NAMES=LAT*", "-oo", "Z_POSSIBLE_NAMES=ELEV*", "acma_rrl.gpkg", csv])
+    if str(csv).find("text_block") > -1:
+        csv.unlink()
+        continue
+    run(["ogr2ogr", "-update", "-overwrite", "-a_srs", "EPSG:4326", "-oo", "X_POSSIBLE_NAMES=LON*", "-oo", "Y_POSSIBLE_NAMES=LAT*", "-oo", "Z_POSSIBLE_NAMES=ELEV*", "acma_rrl.gpkg", csv])
     csv.unlink()
