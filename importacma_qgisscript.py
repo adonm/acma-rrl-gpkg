@@ -55,4 +55,11 @@ class ImportACMAData(QgsProcessingAlgorithm):
                 continue
             run(["ogr2ogr", "-update", "-overwrite", "-a_srs", "EPSG:4326", "-oo", "AUTODETECT_TYPE=YES", "-oo", "AUTODETECT_WIDTH=YES", "-oo", "AUTODETECT_SIZE_LIMIT=0", "-oo", "X_POSSIBLE_NAMES=LON*", "-oo", "Y_POSSIBLE_NAMES=LAT*", "-oo", "Z_POSSIBLE_NAMES=ELEV*", "acma_rrl.gpkg", csv])
             csv.unlink()
+        # Setup materialised view for fast querying of relevant data (constrained to specific entities by ABN)
+        run(["ogr2ogr", "-update", "-overwrite", "acma_rrl.gpkg", "-sql", """
+            select * from (select * from device_details inner join licence on device_details.LICENCE_NO = licence.LICENCE_NO) device_licence 
+            inner join site on site.SITE_ID = device_licence.SITE_ID 
+            inner join client on client.CLIENT_NO = device_licence.CLIENT_NO 
+            where ABN in (91724684688,39563851304,38052249024,55028468715)
+        """, "-nln", "licence_detail", "acma_rrl.gpkg"])
         return {self.OUTPUT: parameters["OUTPUT"]}
