@@ -1,0 +1,36 @@
+<OGRVRTDataSource>
+    <OGRVRTLayer name="site">
+        <SrcDataSource relativeToVRT="1">/vsizip/spectra_rrl.zip/site.csv</SrcDataSource>
+        <OpenOptions>
+            <OOI key="AUTODETECT_TYPE">YES</OOI>
+            <OOI key="AUTODETECT_SIZE_LIMIT">0</OOI>
+            <OOI key="X_POSSIBLE_NAMES">LON*</OOI>
+            <OOI key="Y_POSSIBLE_NAMES">LAT*</OOI>
+            <OOI key="Z_POSSIBLE_NAMES">ELEV*</OOI>
+        </OpenOptions>
+        <LayerSRS>EPSG:4326</LayerSRS>
+    </OGRVRTLayer>
+    <OGRVRTLayer name="client">
+        <OpenOptions>
+            <OOI key="AUTODETECT_TYPE">YES</OOI>
+            <OOI key="AUTODETECT_SIZE_LIMIT">0</OOI>
+        </OpenOptions>
+        <SrcDataSource relativeToVRT="1">/vsizip/spectra_rrl.zip/client.csv</SrcDataSource>
+        <SrcSQL dialect="SQLite">select * from client where ABN in (91724684688,39563851304,38052249024,55028468715,18951343745,28003434917,18540492861,61850109576)</SrcSQL>
+    </OGRVRTLayer>
+    <OGRVRTLayer name="device_details">
+        <OpenOptions>
+            <OOI key="AUTODETECT_TYPE">YES</OOI>
+            <OOI key="AUTODETECT_SIZE_LIMIT">0</OOI>
+        </OpenOptions>
+        <SrcDataSource relativeToVRT="1">/vsizip/spectra_rrl.zip/device_details.csv</SrcDataSource>
+        <SrcSQL dialect="SQLite">select LICENCE_NO, DEVICE_REGISTRATION_IDENTIFIER, FREQUENCY, BANDWIDTH, EMISSION, DEVICE_TYPE, TRANSMITTER_POWER, SITE_ID, HEIGHT, CALL_SIGN, AREA_DESCRIPTION from device_details</SrcSQL>
+    </OGRVRTLayer>
+    <OGRVRTLayer name="licence">
+        <OpenOptions>
+            <OOI key="AUTODETECT_TYPE">YES</OOI>
+            <OOI key="AUTODETECT_SIZE_LIMIT">0</OOI>
+        </OpenOptions>
+        <SrcDataSource relativeToVRT="1">/vsizip/spectra_rrl.zip/licence.csv</SrcDataSource>
+    </OGRVRTLayer>
+</OGRVRTDataSource>

@@ -2,12 +2,13 @@
 Convert the acma data dumped daily from https://www.acma.gov.au/radiocomms-licence-data into a geopackage with some convenience views.
 
 ## Requirements
-Local docker installation
+Python3 and local ogr2ogr binary (The [GDAL Docker Images](https://github.com/OSGeo/gdal/tree/master/docker) have both installed by default)
 
 ## Usage
-Files will be saved to `/var/lib/docker/volumes/data/_data` 
+Files will be saved to the current directory
 
 ```bash
-docker build . -t acma
-docker run -v data:/data acma
+git clone https://github.com/adonm/acma-rrl-gpkg.git
+cd acma-rrl-gpkg
+./downloadacmadata.py
 ```
