@@ -20,7 +20,8 @@
                 (select * from client inner join licence on client.CLIENT_NO = licence.CLIENT_NO
                 inner join device_details on device_details.LICENCE_NO = licence.LICENCE_NO
                 inner join site on site.SITE_ID = device_details.SITE_ID
-                where ABN in (91724684688,39563851304,38052249024,55028468715,18951343745,28003434917,18540492861,61850109576)) filtered_devices
+                where ABN in (91724684688,39563851304,38052249024,55028468715,18951343745,28003434917,18540492861,61850109576)
+                and DEVICE_TYPE = 'T') filtered_devices
             group by SITE_ID, LICENCEE, band order by SITE_ID, LICENCEE, channels
         </SrcSQL>
     </OGRVRTLayer>
