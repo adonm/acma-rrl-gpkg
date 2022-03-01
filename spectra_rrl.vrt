@@ -16,7 +16,6 @@
             <OOI key="AUTODETECT_SIZE_LIMIT">0</OOI>
         </OpenOptions>
         <SrcDataSource relativeToVRT="1">/vsizip/spectra_rrl.zip/client.csv</SrcDataSource>
-        <SrcSQL dialect="SQLite">select * from client where ABN in (91724684688,39563851304,38052249024,55028468715,18951343745,28003434917,18540492861,61850109576)</SrcSQL>
     </OGRVRTLayer>
     <OGRVRTLayer name="device_details">
         <OpenOptions>

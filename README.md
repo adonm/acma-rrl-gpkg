@@ -12,3 +12,5 @@ git clone https://github.com/adonm/acma-rrl-gpkg.git
 cd acma-rrl-gpkg
 ./downloadacmadata.py
 ```
+
+There will be 2 outputs, `spectra_rrl.gpkg` including the raw data and `spectra_rrl_query.gpkg` which is the filtered subset based on the SQL statement in `spectra_rrl_query.vrt`
