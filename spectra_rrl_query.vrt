@@ -8,4 +8,20 @@
             where ABN in (91724684688,39563851304,38052249024,55028468715,18951343745,28003434917,18540492861,61850109576)
         </SrcSQL>
     </OGRVRTLayer>
+    <OGRVRTLayer name="aggregated_sites">
+        <SrcDataSource relativeToVRT="1">spectra_rrl.gpkg</SrcDataSource>
+        <SrcSQL dialect="SQLite">
+            SELECT geom, SITE_ID, LICENCEE, NAME, LONGITUDE, LATITUDE, count(FREQUENCY) as channels, 
+            CASE (frequency/50000000 * 50) WHEN 0 THEN "HF" WHEN 50 THEN "VHF Mid Band" WHEN 100 THEN "VHF High Band" 
+            WHEN 150 THEN "VHF High Band" WHEN 400 THEN "UHF" WHEN 450 THEN "UHF" WHEN 500 THEN "UHF"
+            WHEN 800 THEN "UHF 800" WHEN 850 THEN "UHF 800" ELSE 'Microwave' END as band,
+            min(frequency*1.0/1000000) || ":" || max(frequency*1.0/1000000) as range_mhz 
+            from
+                (select * from client inner join licence on client.CLIENT_NO = licence.CLIENT_NO
+                inner join device_details on device_details.LICENCE_NO = licence.LICENCE_NO
+                inner join site on site.SITE_ID = device_details.SITE_ID
+                where ABN in (91724684688,39563851304,38052249024,55028468715,18951343745,28003434917,18540492861,61850109576)) filtered_devices
+            group by SITE_ID, LICENCEE, band order by SITE_ID, LICENCEE, channels
+        </SrcSQL>
+    </OGRVRTLayer>
 </OGRVRTDataSource>
