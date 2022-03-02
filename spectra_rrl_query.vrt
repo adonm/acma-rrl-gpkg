@@ -2,7 +2,8 @@
     <OGRVRTLayer name="aggregated_sites">
         <SrcDataSource relativeToVRT="1">spectra_rrl.vrt</SrcDataSource>
         <SrcSQL dialect="SQLite">
-            SELECT geom, SITE_ID, LICENCEE, LICENCEE || ' - ' || band as NETWORK, NAME, LONGITUDE, LATITUDE, count(FREQUENCY) as channels, 
+            SELECT geom, SITE_ID, LICENCEE, NAME, LONGITUDE, LATITUDE, count(FREQUENCY) as channels,
+            CASE (count(FREQUENCY) > 3) WHEN TRUE THEN "Trunked" ELSE "Standalone" END as SITE_DENSITY,
             CASE (frequency/50000000 * 50) 
                 WHEN 0 THEN "HF" WHEN 50 THEN "VHF Mid Band" 
                 WHEN 100 THEN "VHF High Band" WHEN 150 THEN "VHF High Band" 
@@ -13,26 +14,21 @@
             from filtered_devices group by SITE_ID, LICENCEE, band order by SITE_ID, LICENCEE, channels
         </SrcSQL>
     </OGRVRTLayer>
-    <OGRVRTLayer name="network_coverage">
-        <SrcDataSource relativeToVRT="1">spectra_rrl.vrt</SrcDataSource>
+    <OGRVRTLayer name="network_sites">
+        <SrcDataSource relativeToVRT="1">spectra_rrl_query.gpkg</SrcDataSource>
         <SrcSQL dialect="SQLite">
-            select ExtractPolygons(ST_UNARYUNION(ST_BUFFER(geom, buffersize))) as geom, ST_AREA( ST_UNARYUNION(ST_BUFFER(geom, buffersize))) / 1000000.0 as area_sqkm, LICENCEE, LICENCEE || ' - ' || band as NETWORK, band, range_mhz from
-                (SELECT ST_COLLECT(geom) as geom, LICENCEE, 
-                CASE (frequency/50000000 * 50) 
-                    WHEN 0 THEN "HF" WHEN 50 THEN "VHF Mid Band" 
-                    WHEN 100 THEN "VHF High Band" WHEN 150 THEN "VHF High Band" 
-                    WHEN 400 THEN "UHF" WHEN 450 THEN "UHF" WHEN 500 THEN "UHF"
-                    WHEN 800 THEN "UHF 800" WHEN 850 THEN "UHF 800" 
-                    ELSE 'Microwave' END
-                as band,
-                CASE (frequency/50000000 * 50) 
-                    WHEN 0 THEN 3000000 WHEN 50 THEN 40000 
-                    WHEN 100 THEN 40000 WHEN 150 THEN 40000 
-                    WHEN 400 THEN 25000 WHEN 450 THEN 25000 WHEN 500 THEN 25000
-                    WHEN 800 THEN 25000 WHEN 850 THEN 25000 
-                    ELSE 0 END
-                as buffersize, min(frequency*1.0/1000000) || ":" || max(frequency*1.0/1000000) as range_mhz 
-                from filtered_devices where buffersize > 0 group by LICENCEE, band order by LICENCEE, band) groupedpoints
+            select LICENCEE || ' - ' || band || ' ' || SITE_DENSITY as NETWORK, * from aggregated_sites order by NETWORK
+        </SrcSQL>
+    </OGRVRTLayer>
+    <OGRVRTLayer name="network_coverage">
+        <SrcDataSource relativeToVRT="1">spectra_rrl_query.gpkg</SrcDataSource>
+        <SrcSQL dialect="SQLite">
+            select NETWORK, ExtractMultiPolygon(ST_BUFFER(geom, buffersize)) as geom, ST_AREA( ST_UNARYUNION(ST_BUFFER(geom, buffersize))) / 1000000.0 as area_sqkm, 
+            LICENCEE, total_channels, ranges_mhz from
+                (SELECT ST_COLLECT(geom) as geom, NETWORK, LICENCEE, SUM(channels) as total_channels, GROUP_CONCAT(DISTINCT(range_mhz)) as ranges_mhz, CASE (band) 
+                    WHEN "HF" THEN 3000000 WHEN "VHF Mid Band" THEN 40000 WHEN "VHF High Band" THEN 40000
+                    WHEN "UHF" THEN 25000 WHEN "UHF 800" THEN 25000 ELSE 0 END as buffersize
+                from network_sites where buffersize > 0 group by NETWORK order by NETWORK) groupedpoints
         </SrcSQL>
     </OGRVRTLayer>
 </OGRVRTDataSource>
