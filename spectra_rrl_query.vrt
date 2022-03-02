@@ -3,7 +3,7 @@
         <SrcDataSource relativeToVRT="1">spectra_rrl.vrt</SrcDataSource>
         <SrcSQL dialect="SQLite">
             SELECT geom, SITE_ID, LICENCEE, NAME, LONGITUDE, LATITUDE, count(FREQUENCY) as channels,
-            CASE (count(FREQUENCY) > 3) WHEN TRUE THEN "Trunked" ELSE "Standalone" END as SITE_DENSITY,
+            CASE (count(FREQUENCY) > 3) WHEN TRUE THEN "4+ channels" ELSE "3 channels or less" END as SITE_DENSITY,
             CASE (frequency/50000000 * 50) 
                 WHEN 0 THEN "HF" WHEN 50 THEN "VHF Mid Band" 
                 WHEN 100 THEN "VHF High Band" WHEN 150 THEN "VHF High Band" 
