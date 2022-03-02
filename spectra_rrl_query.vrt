@@ -24,8 +24,8 @@
         <SrcDataSource relativeToVRT="1">spectra_rrl_query.gpkg</SrcDataSource>
         <SrcSQL dialect="SQLite">
             select NETWORK, ExtractMultiPolygon(ST_BUFFER(geom, buffersize)) as geom, ST_AREA( ST_UNARYUNION(ST_BUFFER(geom, buffersize))) / 1000000.0 as area_sqkm, 
-            LICENCEE, total_channels, band, ranges_mhz from
-                (SELECT ST_COLLECT(geom) as geom, NETWORK, LICENCEE, SUM(channels) as total_channels, band, GROUP_CONCAT(DISTINCT(range_mhz)) as ranges_mhz, CASE (band) 
+            LICENCEE, total_channels, band from
+                (SELECT ST_COLLECT(geom) as geom, NETWORK, LICENCEE, SUM(channels) as total_channels, band, CASE (band) 
                     WHEN "HF" THEN 3000000 WHEN "VHF Mid Band" THEN 40000 WHEN "VHF High Band" THEN 40000
                     WHEN "UHF" THEN 25000 WHEN "UHF 800" THEN 25000 ELSE 0 END as buffersize
                 from network_sites where buffersize > 0 group by NETWORK order by NETWORK) groupedpoints
