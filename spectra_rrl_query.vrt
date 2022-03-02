@@ -2,7 +2,7 @@
     <OGRVRTLayer name="aggregated_sites">
         <SrcDataSource relativeToVRT="1">spectra_rrl.vrt</SrcDataSource>
         <SrcSQL dialect="SQLite">
-            SELECT geom, SITE_ID, LICENCEE, NAME, LONGITUDE, LATITUDE, count(FREQUENCY) as channels, 
+            SELECT geom, SITE_ID, LICENCEE, LICENCEE || ' - ' || band as NETWORK, NAME, LONGITUDE, LATITUDE, count(FREQUENCY) as channels, 
             CASE (frequency/50000000 * 50) 
                 WHEN 0 THEN "HF" WHEN 50 THEN "VHF Mid Band" 
                 WHEN 100 THEN "VHF High Band" WHEN 150 THEN "VHF High Band" 
@@ -16,7 +16,7 @@
     <OGRVRTLayer name="network_coverage">
         <SrcDataSource relativeToVRT="1">spectra_rrl.vrt</SrcDataSource>
         <SrcSQL dialect="SQLite">
-            select ST_UNARYUNION(ST_BUFFER(geom, buffersize)) as geom, ST_AREA( ST_UNARYUNION(ST_BUFFER(geom, buffersize))) / 1000000.0 as area_sqkm, LICENCEE, band, range_mhz from
+            select ExtractPolygons(ST_UNARYUNION(ST_BUFFER(geom, buffersize))) as geom, ST_AREA( ST_UNARYUNION(ST_BUFFER(geom, buffersize))) / 1000000.0 as area_sqkm, LICENCEE, LICENCEE || ' - ' || band as NETWORK, band, range_mhz from
                 (SELECT ST_COLLECT(geom) as geom, LICENCEE, 
                 CASE (frequency/50000000 * 50) 
                     WHEN 0 THEN "HF" WHEN 50 THEN "VHF Mid Band" 
