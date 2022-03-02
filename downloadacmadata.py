@@ -10,5 +10,9 @@ if not os.path.exists("spectra_rrl_query.gpkg"):
     run("ogr2ogr -unsetFid spectra_rrl_query.gpkg spectra_rrl_query.vrt aggregated_sites", shell=True)
     run("ogr2ogr -update -unsetFid spectra_rrl_query.gpkg spectra_rrl_query.vrt network_sites", shell=True)
     run("ogr2ogr -update -unsetFid spectra_rrl_query.gpkg spectra_rrl_query.vrt network_coverage", shell=True)
+if os.path.exists("networks.csv"):
+    os.remove("networks.csv")
 run("ogr2ogr networks.csv spectra_rrl_query.gpkg network_coverage")
+if os.path.exists("sites.csv"):
+    os.remove("sites.csv")
 run("ogr2ogr sites.csv spectra_rrl_query.gpkg network_sites")
