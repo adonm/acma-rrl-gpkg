@@ -32,4 +32,16 @@
         </OpenOptions>
         <SrcDataSource relativeToVRT="1">/vsizip/spectra_rrl.zip/licence.csv</SrcDataSource>
     </OGRVRTLayer>
+    <OGRVRTWarpedLayer>
+        <OGRVRTLayer name="filtered_devices">
+            <SrcDataSource relativeToVRT="1">spectra_rrl.gpkg</SrcDataSource>
+            <SrcSQL dialect="SQLite">
+                select * from client inner join licence on client.CLIENT_NO = licence.CLIENT_NO
+                inner join device_details on device_details.LICENCE_NO = licence.LICENCE_NO
+                inner join site on site.SITE_ID = device_details.SITE_ID
+                where ABN in (91724684688,39563851304,38052249024,55028468715,18951343745,28003434917,18540492861,61850109576)
+            </SrcSQL>
+        </OGRVRTLayer>
+        <TargetSRS>EPSG:3577</TargetSRS>
+    </OGRVRTWarpedLayer>
 </OGRVRTDataSource>

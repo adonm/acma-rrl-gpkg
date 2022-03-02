@@ -14,3 +14,6 @@ cd acma-rrl-gpkg
 ```
 
 There will be 2 outputs, `spectra_rrl.gpkg` including the raw data and `spectra_rrl_query.gpkg` which is the output of queries from `spectra_rrl_query.vrt`
+
+You can open the `coverageoverview.qgs` file in [QGIS](https://docs.qgis.org/3.22/en/docs/user_manual/introduction/getting_started.html#installing-from-binaries) a very powerful desktop GIS tool (all the work with ogr2ogr above was done using the `OSGeo4W Shell` included with QGIS). Then you can interrogate and export data from the generate geopackages.
+

@@ -1,28 +1,38 @@
 <OGRVRTDataSource>
-    <OGRVRTLayer name="filtered_devices">
-        <SrcDataSource relativeToVRT="1">spectra_rrl.gpkg</SrcDataSource>
-        <SrcSQL dialect="SQLite">
-            select * from client inner join licence on client.CLIENT_NO = licence.CLIENT_NO
-            inner join device_details on device_details.LICENCE_NO = licence.LICENCE_NO
-            inner join site on site.SITE_ID = device_details.SITE_ID
-            where ABN in (91724684688,39563851304,38052249024,55028468715,18951343745,28003434917,18540492861,61850109576)
-        </SrcSQL>
-    </OGRVRTLayer>
     <OGRVRTLayer name="aggregated_sites">
-        <SrcDataSource relativeToVRT="1">spectra_rrl.gpkg</SrcDataSource>
+        <SrcDataSource relativeToVRT="1">spectra_rrl.vrt</SrcDataSource>
         <SrcSQL dialect="SQLite">
             SELECT geom, SITE_ID, LICENCEE, NAME, LONGITUDE, LATITUDE, count(FREQUENCY) as channels, 
-            CASE (frequency/50000000 * 50) WHEN 0 THEN "HF" WHEN 50 THEN "VHF Mid Band" WHEN 100 THEN "VHF High Band" 
-            WHEN 150 THEN "VHF High Band" WHEN 400 THEN "UHF" WHEN 450 THEN "UHF" WHEN 500 THEN "UHF"
-            WHEN 800 THEN "UHF 800" WHEN 850 THEN "UHF 800" ELSE 'Microwave' END as band,
-            min(frequency*1.0/1000000) || ":" || max(frequency*1.0/1000000) as range_mhz 
-            from
-                (select * from client inner join licence on client.CLIENT_NO = licence.CLIENT_NO
-                inner join device_details on device_details.LICENCE_NO = licence.LICENCE_NO
-                inner join site on site.SITE_ID = device_details.SITE_ID
-                where ABN in (91724684688,39563851304,38052249024,55028468715,18951343745,28003434917,18540492861,61850109576)
-                and DEVICE_TYPE = 'T') filtered_devices
-            group by SITE_ID, LICENCEE, band order by SITE_ID, LICENCEE, channels
+            CASE (frequency/50000000 * 50) 
+                WHEN 0 THEN "HF" WHEN 50 THEN "VHF Mid Band" 
+                WHEN 100 THEN "VHF High Band" WHEN 150 THEN "VHF High Band" 
+                WHEN 400 THEN "UHF" WHEN 450 THEN "UHF" WHEN 500 THEN "UHF"
+                WHEN 800 THEN "UHF 800" WHEN 850 THEN "UHF 800" 
+                ELSE 'Microwave' END
+            as band, min(frequency*1.0/1000000) || ":" || max(frequency*1.0/1000000) as range_mhz 
+            from filtered_devices group by SITE_ID, LICENCEE, band order by SITE_ID, LICENCEE, channels
+        </SrcSQL>
+    </OGRVRTLayer>
+    <OGRVRTLayer name="network_coverage">
+        <SrcDataSource relativeToVRT="1">spectra_rrl.vrt</SrcDataSource>
+        <SrcSQL dialect="SQLite">
+            select ST_UNARYUNION(ST_BUFFER(geom, buffersize)) as geom, ST_AREA( ST_UNARYUNION(ST_BUFFER(geom, buffersize))) / 1000000.0 as area_sqkm, LICENCEE, band, range_mhz from
+                (SELECT ST_COLLECT(geom) as geom, LICENCEE, 
+                CASE (frequency/50000000 * 50) 
+                    WHEN 0 THEN "HF" WHEN 50 THEN "VHF Mid Band" 
+                    WHEN 100 THEN "VHF High Band" WHEN 150 THEN "VHF High Band" 
+                    WHEN 400 THEN "UHF" WHEN 450 THEN "UHF" WHEN 500 THEN "UHF"
+                    WHEN 800 THEN "UHF 800" WHEN 850 THEN "UHF 800" 
+                    ELSE 'Microwave' END
+                as band,
+                CASE (frequency/50000000 * 50) 
+                    WHEN 0 THEN 3000000 WHEN 50 THEN 40000 
+                    WHEN 100 THEN 40000 WHEN 150 THEN 40000 
+                    WHEN 400 THEN 25000 WHEN 450 THEN 25000 WHEN 500 THEN 25000
+                    WHEN 800 THEN 25000 WHEN 850 THEN 25000 
+                    ELSE 0 END
+                as buffersize, min(frequency*1.0/1000000) || ":" || max(frequency*1.0/1000000) as range_mhz 
+                from filtered_devices where buffersize > 0 group by LICENCEE, band order by LICENCEE, band) groupedpoints
         </SrcSQL>
     </OGRVRTLayer>
 </OGRVRTDataSource>
